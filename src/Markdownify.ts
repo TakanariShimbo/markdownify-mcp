@@ -22,15 +22,20 @@ export class Markdownify {
     uvPath: string,
   ): Promise<string> {
     const venvPath = path.join(projectRoot, ".venv");
-    const markitdownPath = path.join(venvPath, "bin", "markitdown");
+    const markitdownPath = path.join(venvPath, "Scripts", "markitdown.exe");
 
     if (!fs.existsSync(markitdownPath)) {
       throw new Error("markitdown executable not found");
     }
 
-    const { stdout, stderr } = await execAsync(
-      `${uvPath} run ${markitdownPath} "${filePath}"`,
-    );
+    const cmd = `"${uvPath}" run markitdown "${filePath}"`;
+    const { stdout, stderr } = await execAsync(cmd, {
+      cwd: projectRoot,
+      env: {
+        ...process.env,
+        PYTHONIOENCODING: "utf-8",
+      },
+    });
 
     if (stderr) {
       throw new Error(`Error executing command: ${stderr}`);
